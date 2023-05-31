@@ -4,9 +4,10 @@ import { getProduct } from '../Components/ProductList/Products';
 
 const AppContext = createContext();
 
-const AppProvider = (props) => {
+const AppProvider = ({ children}) => {
   const [increment, setIncrement]= useState(1);
   const [items, setItems] = useState([]);
+  const [location, setLocation]  = useState(null);
 
   function addItemToCart(id) {
 
@@ -34,9 +35,23 @@ const AppProvider = (props) => {
 };
 
 
+// function getItemsCount() {
+//   return items.reduce((sum, item) => (sum + item.qty), 0);
+// }
+
 function getItemsCount() {
-  return items.reduce((sum, item) => (sum + item.qty), 0);
-}
+  const itemCounts = {};
+  items.forEach((item) => {
+    if (itemCounts[item.id]) {
+      itemCounts[item.id] += item.qty;
+    } else {
+      itemCounts[item.id] = item.qty;
+    }
+  });
+  return itemCounts;
+};
+
+
 
 function getTotalPrice() {
   return items.reduce((sum, item) => (sum + item.totalPrice), 0);
@@ -44,8 +59,8 @@ function getTotalPrice() {
 
 
   return (
-    <AppContext.Provider value={{increment, setIncrement, items, setItems, getItemsCount, addItemToCart, getTotalPrice}}>
-      {props.children}
+    <AppContext.Provider value={{increment, setIncrement, items, setItems, getItemsCount, addItemToCart, getTotalPrice, location, setLocation}}>
+      {children}
     </AppContext.Provider>
   );
 };

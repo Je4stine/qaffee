@@ -14,6 +14,7 @@ import Home from '../Screens/Home';
 import Cart from '../Screens/Cart';
 import Profile from '../Screens/Profile';
 import FoodDetail from '../Components/FoodDetail';
+import Preparing from '../Screens/Preparing';
 
 
 
@@ -22,7 +23,7 @@ const Stack = createStackNavigator();
 
 function MainTabs() {
   return (
-    <Tab.Navigator options ={{  tabBarShowLabel: false, headerShown: false, tabBarHideOnKeyboard: true}}>
+    <Tab.Navigator options ={{  tabBarShowLabel: false, headerShown: false, }} screenOptions={{ tabBarHideOnKeyboard: true,}}>
       <Tab.Screen name="Home" component={Home} 
         options = {{
         tabBarActiveTintColor:"#58362a",
@@ -66,6 +67,7 @@ function MainStack(){
             <Stack.Navigator>
                 <Stack.Screen name="Main" component={MainTabs} options={{headerShown: false}}/>
                 <Stack.Screen name='Food' component={FoodDetail} options={{ headerShown: false}}/>
+                <Stack.Screen name='Prep' component={Preparing} options={{ headerShown: false}}/>
             </Stack.Navigator>
         </NavigationContainer>
     )
