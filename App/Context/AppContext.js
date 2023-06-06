@@ -8,6 +8,7 @@ const AppProvider = ({ children}) => {
   const [increment, setIncrement]= useState(1);
   const [items, setItems] = useState([]);
   const [location, setLocation]  = useState(null);
+  const  [ myAddress, setMyAddress]= useState('');
 
   function addItemToCart(id) {
 
@@ -59,7 +60,7 @@ function getTotalPrice() {
 
 
   return (
-    <AppContext.Provider value={{increment, setIncrement, items, setItems, getItemsCount, addItemToCart, getTotalPrice, location, setLocation}}>
+    <AppContext.Provider value={{increment, setIncrement, items, setItems, getItemsCount, addItemToCart, getTotalPrice, location, setLocation, myAddress, setMyAddress}}>
       {children}
     </AppContext.Provider>
   );

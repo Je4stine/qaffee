@@ -18,13 +18,16 @@ import * as Location from 'expo-location';
 import { AppContext } from '../Context/AppContext';
 
 
-const renderMenuItem = ({ item, viewCategories1 }) => (
-  
-  <Menus key={item.id} Title={item.title} Menusimg={item.imageurl} menuPress={viewCategories1}/>
+const renderMenuItem = ({ item, menuPress }) => (
+  <Menus
+    key={item.id}
+    Title={item.title}
+    Menusimg={item.imageurl}
+    menuPress={() => menuPress(item)} // Pass the item as an argument to menuPress
+  />
 );
 
-
-const renderMenuRows = ( viewCategories1) => {
+const renderMenuRows = (menuPress) => {
   const dataLength = DATA.length;
   const halfLength = Math.ceil(dataLength / 2);
   const firstHalf = DATA.slice(0, halfLength);
@@ -35,14 +38,14 @@ const renderMenuRows = ( viewCategories1) => {
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {firstHalf.map((item, index) => (
           <View key={item.id}>
-            {renderMenuItem({ item })}
+            {renderMenuItem({ item, menuPress })}
           </View>
         ))}
       </ScrollView>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {secondHalf.map((item, index) => (
           <View key={item.id}>
-            {renderMenuItem({ item })}
+            {renderMenuItem({ item, menuPress })}
           </View>
         ))}
       </ScrollView>
@@ -61,23 +64,52 @@ const Home = () => {
   const [productId, setProductId]=useState(0);
   const navigation = useNavigation();
   const [errorMsg, setErrorMsg] = useState(null);
-  const { location, setLocation} = useContext(AppContext);
+  const [myL, setMyL]=useState(null)
+  const { location, setLocation, myAddress, setMyAddress} = useContext(AppContext);
+
+  const GetCurrentLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+  
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permission not granted',
+        'Allow the Qaffee Point to use location service.',
+        [{ text: 'OK' }],
+        { cancelable: false }
+      );
+    }
+  
+    let { coords } = await Location.getCurrentPositionAsync();
+    setLocation(coords);
+    setMyL(coords)
+    console.log(myL)
+  
+    if (coords) {
+      const { latitude, longitude } = coords;
+      let response = await Location.reverseGeocodeAsync({
+        latitude,
+        longitude
+      });
+      
+  
+      for (let item of response) {
+        let address = `${item.district}, ${item.city}`;
+  
+        // setDisplayCurrentAddress(address);
+        setMyAddress(address)
+      }
+    }
+  };
+
+
 
   useEffect(() => {
-    (async () => {
-      
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-      console.log(location.coords.latitude)
-      
-    })();
+    GetCurrentLocation()
   }, []);
+
+  const menuPress =(item)=>{
+    navigation.navigate('Categories', { imageurl:item.imageurl, title:item.title})
+  }
 
 
  
@@ -103,9 +135,9 @@ const Home = () => {
   };
 
  
-  const viewCategories =()=>{
-    navigation.navigate('Food',{ imageurl:item.imageurl, Title:item.title})
-  };
+  // const viewCategories =()=>{
+  //   navigation.navigate('Food',{ imageurl:item.imageurl, Title:item.title})
+  // };
   
 
 
@@ -121,7 +153,7 @@ const Home = () => {
           <View>
             <Text style={{ fontSize:14, fontFamily:'Poppins'}}>Deliver Now!</Text>
             <View style={{ flexDirection:'row', justifyContent:'center', alignItems:'center'}}>
-              <Text style={{ fontSize:16, fontFamily:'PoppinsB'}}>Current Location</Text>
+              <Text style={{ fontSize:16, fontFamily:'PoppinsB'}}>{myAddress || 'Current Location'}</Text>
               <SimpleLineIcons name="arrow-down" size={12} color="black" style={{marginLeft:10}}/>
             </View>
           </View>
@@ -148,9 +180,7 @@ const Home = () => {
           <View style={{ backgroundColor:'#D9D9D9', height:1, width:'25%'}}></View>
         </View>
       
-           {
-            renderMenuRows()
-           }
+        {renderMenuRows(menuPress)}
            <View>
                 <View style={{ flexDirection:'row', alignItems:'center', justifyContent:'center', marginTop:20}}>
                     <View style={{ backgroundColor:'#D9D9D9', height:1, width:'25%'}}></View>
@@ -162,7 +192,7 @@ const Home = () => {
          {
           products.map((item)=>{
             return(
-            <FoodsCard key={item.id} name={item.name} duration={item.duration} price={item.price} image={item.image} onPress={()=>navigation.navigate('Food',{ productId:item.id, name:item.name, price:item.price, description:item.description, image: item.image, duration:item.duration })}/>
+            <FoodsCard key={item.id} name={item.name} rating={item.rating} duration={item.duration} price={item.price} image={item.image} onPress={()=>navigation.navigate('Food',{ productId:item.id, name:item.name, price:item.price, description:item.description, image: item.image, duration:item.duration, rating: item.rating })}/>
             )
           })
          }
@@ -176,23 +206,23 @@ const Home = () => {
               margin: 2,
               justifyContent: 'center',
               alignItems: 'center',
-              backgroundColor: '#E0F7FA',
+              backgroundColor: '#fff',
               borderTopLeftRadius:30,
               borderTopRightRadius:30,
               }}>
+            <View><Text style={{ color:'#000', fontFamily:'PoppinsB', marginBottom:10}}>Your Current location is {myAddress || 'Current Location'}</Text></View>
             <View style={{backgroundColor: '#fff',
               width: '100%',
-              height: '70%',
+              height: '75%',
               justifyContent: 'center',
               borderTopLeftRadius:30,
               borderTopRightRadius:30,
               }}>
-         {location && location.coords ? (
-
+         {location ? (
               <MapView
               initialRegion={{
-                  latitude: location.coords.latitude ,
-                  longitude:location.coords.longitude,
+                  latitude: location.latitude ,
+                  longitude:location.longitude,
                   latitudeDelta: 0.005,
                   longitudeDelta: 0.005,
 
@@ -203,8 +233,8 @@ const Home = () => {
               >
               <Marker
                   coordinate={{
-                      latitude: location.coords.latitude ,
-                      longitude: location.coords.longitude ,
+                      latitude: location.latitude ,
+                      longitude: location.longitude ,
                   }}
                   // image={urlFor(restraunt.imgUrl).width().url()}
                   // title={restraunt.title}

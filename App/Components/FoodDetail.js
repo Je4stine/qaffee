@@ -10,10 +10,11 @@ import Frequent from './Frequent';
 import { AppContext } from '../Context/AppContext';
 import { getProduct } from './ProductList/Products';
 
+import { FontAwesome } from '@expo/vector-icons';
 
 
 const FoodDetail = ({navigation, route}) => {
-  const { image, price, duration, description, name, productId} = route.params;
+  const { image, price, duration, description, name, productId, rating} = route.params;
   const { increment, setIncrement, addItemToCart}=useContext(AppContext);
   const [product, setProduct] = useState({});
 
@@ -52,9 +53,16 @@ const FoodDetail = ({navigation, route}) => {
       <Image source={{ uri:image}} style={{ width:'100%', height:250}}/>
       <TouchableOpacity onPress={()=>navigation.goBack()} style={{ position:'absolute', top:40, left:10}}><AntDesign name="leftcircle" size={24} color="#fff" /></TouchableOpacity>
       <View style={{ backgroundColor:'#fff', padding:10}}>
-            <Text style={{ fontFamily:'PoppinsB', fontSize:25}}>
-                {name}
-            </Text>
+            <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
+                <Text style={{ fontFamily:'PoppinsB', fontSize:25}}>
+                    {name}
+                </Text>
+                <View style={{ flexDirection:'row', justifyContent:'center', }}>
+                  <Text style={{ fontFamily:'Poppins', marginRight:3}}>{rating}</Text>
+                  <FontAwesome name="star" size={13} color="black" style={{ marginTop:2}}/>
+                </View>
+            </View>
+            
             <Text style={{ fontFamily:'PoppinsB', fontSize:15,  marginBottom:20}}>
                 Ksh.{price}
             </Text>

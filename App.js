@@ -29,7 +29,7 @@ export default function App() {
     <AppProvider>
     <View style={styles.container}  onLayout={onLayoutRootView}>
       <MainStack/>
-      <StatusBar style="auto" />
+      <StatusBar style="dark-content" />
     </View>
     </AppProvider>
   );
